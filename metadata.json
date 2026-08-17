@@ -1,0 +1,7 @@
+{
+  "name": "Hearsay & Heresy",
+  "description": "Generate, customize, and remix hilarious theological hearsay jokes based on guided recipes, slot modifications, fine-print clauses, and social media sharing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
