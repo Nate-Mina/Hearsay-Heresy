@@ -20,7 +20,11 @@ data class JokeEntity(
     val finePrintStyle: String?,
     val customPunchline: String? = null,
     val isFavorite: Boolean = false,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val keywords: String? = null,
+    val humorCategory: String? = null,
+    val targetAudience: String? = null,
+    val tone: String? = null
 )
 
 fun JokeEntity.toDomainModel(): GeneratedJoke = GeneratedJoke(
@@ -37,7 +41,11 @@ fun JokeEntity.toDomainModel(): GeneratedJoke = GeneratedJoke(
     finePrintStyle = finePrintStyle,
     customPunchline = customPunchline,
     isFavorite = isFavorite,
-    timestamp = timestamp
+    timestamp = timestamp,
+    keywords = keywords,
+    humorCategory = humorCategory,
+    targetAudience = targetAudience,
+    tone = tone
 )
 
 fun GeneratedJoke.toEntity(): JokeEntity = JokeEntity(
@@ -54,7 +62,11 @@ fun GeneratedJoke.toEntity(): JokeEntity = JokeEntity(
     finePrintStyle = finePrintStyle,
     customPunchline = customPunchline,
     isFavorite = isFavorite,
-    timestamp = timestamp
+    timestamp = timestamp,
+    keywords = keywords,
+    humorCategory = humorCategory,
+    targetAudience = targetAudience,
+    tone = tone
 )
 
 @Entity(tableName = "custom_recipes")

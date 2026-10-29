@@ -3,6 +3,8 @@ package com.example.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -160,6 +163,63 @@ fun IlluminatedJokeCard(
                         contentDescription = "Share",
                         tint = MaterialTheme.colorScheme.primary
                     )
+                }
+            }
+
+            // Customization Badges (Humor Category, Target Audience, Tone, Keywords)
+            if (!joke.humorCategory.isNullOrBlank() || !joke.targetAudience.isNullOrBlank() || !joke.tone.isNullOrBlank() || !joke.keywords.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    joke.humorCategory?.let { category ->
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(category, style = MaterialTheme.typography.labelSmall) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                        )
+                    }
+                    joke.targetAudience?.let { audience ->
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(audience, style = MaterialTheme.typography.labelSmall) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                                labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
+                        )
+                    }
+                    joke.tone?.let { tone ->
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(tone, style = MaterialTheme.typography.labelSmall) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                                labelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f))
+                        )
+                    }
+                    joke.keywords?.let { kw ->
+                        AssistChip(
+                            onClick = {},
+                            label = { Text("🏷️ $kw", style = MaterialTheme.typography.labelSmall) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = GoldPrimary.copy(alpha = 0.15f),
+                                labelColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            border = BorderStroke(1.dp, GoldPrimary.copy(alpha = 0.4f))
+                        )
+                    }
                 }
             }
 

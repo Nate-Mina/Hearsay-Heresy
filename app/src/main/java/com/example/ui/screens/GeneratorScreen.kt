@@ -19,9 +19,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -29,6 +37,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +45,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,23 +55,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.generator.JokeSlot
 import com.example.model.GeneratedJoke
+import com.example.model.HumorCategory
+import com.example.model.JokeCustomizationParams
 import com.example.model.JokeRecipe
+import com.example.model.JokeTone
+import com.example.model.TargetAudience
 import com.example.ui.components.IlluminatedJokeCard
 import com.example.ui.theme.BurgundySecondary
 import com.example.ui.theme.GoldPrimary
 import com.example.ui.theme.WaxSealRed
-
-import androidx.compose.material.icons.filled.Casino
-import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.Shuffle
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.VolumeUp
 
 @Composable
 fun GeneratorScreen(
@@ -84,6 +93,17 @@ fun GeneratorScreen(
     onOpenVocalOrator: (GeneratedJoke) -> Unit,
     isSpeaking: Boolean,
     onNavigateToLab: () -> Unit,
+    customizationParams: JokeCustomizationParams,
+    isCustomizationExpanded: Boolean,
+    keywordSuggestions: List<String>,
+    onKeywordsChange: (String) -> Unit,
+    onKeywordSuggestionClick: (String) -> Unit,
+    onHumorCategorySelect: (HumorCategory) -> Unit,
+    onTargetAudienceSelect: (TargetAudience) -> Unit,
+    onToneSelect: (JokeTone) -> Unit,
+    onToggleCustomizationPanel: () -> Unit,
+    onRandomizeCustomization: () -> Unit,
+    onResetCustomization: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -249,7 +269,25 @@ fun GeneratorScreen(
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // Advanced Customization Panel (Keywords, Humor Category, Target Audience, Tone)
+        AdvancedCustomizationPanel(
+            customizationParams = customizationParams,
+            isExpanded = isCustomizationExpanded,
+            keywordSuggestions = keywordSuggestions,
+            onKeywordsChange = onKeywordsChange,
+            onKeywordSuggestionClick = onKeywordSuggestionClick,
+            onHumorCategorySelect = onHumorCategorySelect,
+            onTargetAudienceSelect = onTargetAudienceSelect,
+            onToneSelect = onToneSelect,
+            onTogglePanel = onToggleCustomizationPanel,
+            onRandomizeCustomization = onRandomizeCustomization,
+            onResetCustomization = onResetCustomization,
+            activeRecipeTitle = activeRecipe.title
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Primary Action Generation Bar
         Row(
@@ -375,6 +413,335 @@ fun GeneratorScreen(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+fun AdvancedCustomizationPanel(
+    customizationParams: JokeCustomizationParams,
+    isExpanded: Boolean,
+    keywordSuggestions: List<String>,
+    onKeywordsChange: (String) -> Unit,
+    onKeywordSuggestionClick: (String) -> Unit,
+    onHumorCategorySelect: (HumorCategory) -> Unit,
+    onTargetAudienceSelect: (TargetAudience) -> Unit,
+    onToneSelect: (JokeTone) -> Unit,
+    onTogglePanel: () -> Unit,
+    onRandomizeCustomization: () -> Unit,
+    onResetCustomization: () -> Unit,
+    activeRecipeTitle: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("advanced_customization_panel"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        ),
+        border = BorderStroke(1.dp, GoldPrimary.copy(alpha = 0.5f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp)
+        ) {
+            // Header Bar
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(8.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Tune,
+                        contentDescription = null,
+                        tint = GoldPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = "ADVANCED CUSTOMIZATION",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = GoldPrimary,
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = "${customizationParams.humorCategory.icon} ${customizationParams.humorCategory.label.substringBefore(" &")} • ${customizationParams.targetAudience.icon} ${customizationParams.targetAudience.label.substringBefore(" ")} • ${customizationParams.tone.icon} ${customizationParams.tone.label.substringBefore(" ")}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                            maxLines = 1
+                        )
+                    }
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = onRandomizeCustomization,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .testTag("customization_surprise_mix")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Casino,
+                            contentDescription = "Surprise Mix",
+                            tint = GoldPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onTogglePanel,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .testTag("toggle_customization_panel")
+                    ) {
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                            contentDescription = if (isExpanded) "Collapse" else "Expand",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+
+            if (isExpanded) {
+                Spacer(modifier = Modifier.height(10.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // 1. SPECIFIC KEYWORDS
+                Text(
+                    text = "🔑 SPECIFIC KEYWORDS TO WEAVE IN",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 0.8.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = customizationParams.keywords,
+                    onValueChange = onKeywordsChange,
+                    placeholder = {
+                        Text(
+                            "e.g., air fryer, Costco, bluetooth, roomba, microwave fish",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    },
+                    trailingIcon = {
+                        if (customizationParams.keywords.isNotBlank()) {
+                            IconButton(onClick = { onKeywordsChange("") }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Clear Keywords",
+                                    tint = MaterialTheme.colorScheme.outline
+                                )
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("customization_keywords_input"),
+                    shape = RoundedCornerShape(10.dp),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Quick Suggestions Chips
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Sparks:",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    keywordSuggestions.forEach { suggestion ->
+                        AssistChip(
+                            onClick = { onKeywordSuggestionClick(suggestion) },
+                            label = { Text("+ $suggestion", style = MaterialTheme.typography.labelSmall) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                labelColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 2. HUMOR CATEGORY
+                Text(
+                    text = "🎭 DESIRED HUMOR CATEGORY",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 0.8.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    HumorCategory.entries.forEach { category ->
+                        FilterChip(
+                            selected = customizationParams.humorCategory == category,
+                            onClick = { onHumorCategorySelect(category) },
+                            label = {
+                                Text(
+                                    text = "${category.icon} ${category.label}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = if (customizationParams.humorCategory == category) FontWeight.Bold else FontWeight.Normal
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Style: ${customizationParams.humorCategory.description}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    fontStyle = FontStyle.Italic
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 3. TARGET AUDIENCE
+                Text(
+                    text = "👥 TARGET AUDIENCE",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 0.8.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    TargetAudience.entries.forEach { audience ->
+                        FilterChip(
+                            selected = customizationParams.targetAudience == audience,
+                            onClick = { onTargetAudienceSelect(audience) },
+                            label = {
+                                Text(
+                                    text = "${audience.icon} ${audience.label}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = if (customizationParams.targetAudience == audience) FontWeight.Bold else FontWeight.Normal
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Perspective: ${customizationParams.targetAudience.description}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    fontStyle = FontStyle.Italic
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 4. TONE OF DELIVERY
+                Text(
+                    text = "🎙️ TONE OF DELIVERY",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 0.8.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    JokeTone.entries.forEach { tone ->
+                        FilterChip(
+                            selected = customizationParams.tone == tone,
+                            onClick = { onToneSelect(tone) },
+                            label = {
+                                Text(
+                                    text = "${tone.icon} ${tone.label}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = if (customizationParams.tone == tone) FontWeight.Bold else FontWeight.Normal
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Vibe: ${customizationParams.tone.description}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    fontStyle = FontStyle.Italic
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Footer Row: Reset button + Base Recipe indication
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = onResetCustomization,
+                        modifier = Modifier.testTag("reset_customization_button")
+                    ) {
+                        Text(
+                            text = "↺ Reset Customization",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+
+                    Text(
+                        text = "Base: $activeRecipeTitle",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
     }
 }
 

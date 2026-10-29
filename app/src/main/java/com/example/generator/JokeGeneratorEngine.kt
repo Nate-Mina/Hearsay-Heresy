@@ -5,7 +5,11 @@ import com.example.model.DogmaCategory
 import com.example.model.FinePrintCategory
 import com.example.model.GeneratedJoke
 import com.example.model.HearsaySetting
+import com.example.model.HumorCategory
+import com.example.model.JokeCustomizationParams
 import com.example.model.JokeRecipe
+import com.example.model.JokeTone
+import com.example.model.TargetAudience
 import kotlin.random.Random
 
 object JokeGeneratorEngine {
@@ -448,66 +452,141 @@ object JokeGeneratorEngine {
         )
     }
 
-    fun generateJoke(recipe: JokeRecipe): GeneratedJoke {
-        // If it's a known preset and no custom fields are set, return authentic canonical joke
+    fun generateJoke(
+        recipe: JokeRecipe,
+        customParams: JokeCustomizationParams? = null,
+        customTwist: String? = null
+    ): GeneratedJoke {
+        // If it's a known preset and no custom fields or customization params are set, return authentic canonical joke
         if (recipe.isPreset && CANONICAL_JOKES.containsKey(recipe.id) &&
             recipe.customHearsayChain.isNullOrBlank() &&
             recipe.customAbsurdElement.isNullOrBlank() &&
             recipe.customOrthodoxyTarget.isNullOrBlank() &&
-            recipe.customFinePrintCondition.isNullOrBlank()
+            recipe.customFinePrintCondition.isNullOrBlank() &&
+            customParams == null &&
+            customTwist.isNullOrBlank()
         ) {
             val base = CANONICAL_JOKES[recipe.id]!!
             return base.copy(id = System.currentTimeMillis())
         }
 
         // Custom or Dynamic generation
-        val hearsayPrefix = recipe.customHearsayChain?.takeIf { it.isNotBlank() }
-            ?: when (recipe.setting) {
-                HearsaySetting.MEDIEVAL_VILLAGE -> "A traveling cobbler's cousin told the tavern keeper that"
-                HearsaySetting.VATICAN_PALACE -> "The Cardinal's valet overheard the Monsignor whispering that"
-                HearsaySetting.MONASTIC_CLOISTER -> "Brother Francis told the Abbot that the herb gardener admitted that"
-                HearsaySetting.SUBURBAN_BEAUTY_SALON -> "The parish secretary's manicurist told my aunt that"
-                HearsaySetting.TECH_STARTUP_SLACK -> "The junior engineer told the product manager that the CTO secretly admitted that"
-                HearsaySetting.INQUISITORIAL_TRIBUNAL -> "A court bailiff swears he heard the chief witness confess that"
-                HearsaySetting.DOCKSIDE_ALEXANDRIA -> "A spice merchant from Alexandria told the harbor master that"
-                HearsaySetting.DENTAL_WAITING_ROOM -> "My gym teacher's psychic told him that a local hermit revealed that"
+        val baseHearsayPrefix = recipe.customHearsayChain?.takeIf { it.isNotBlank() }
+            ?: when (customParams?.targetAudience) {
+                TargetAudience.MEDIEVAL_PEASANTS -> "A traveling cabbage peddler whispered to the tavern blacksmith that"
+                TargetAudience.CYNICAL_SCHOLARS -> "A bleary-eyed archivist annotating thirteenth-century Latin footnotes claims that"
+                TargetAudience.TIRED_OFFICE_WORKERS -> "The senior product manager DM'ed the staff software engineer on Slack that"
+                TargetAudience.HOA_MEMBERS -> "The neighborhood architectural review committee's treasurer noted in confidential meeting minutes that"
+                TargetAudience.GEN_Z_CYNICS -> "A barista on TikTok whose algorithmic feed manifested a seventeenth-century exorcism claims that"
+                TargetAudience.GENERAL, null -> when (recipe.setting) {
+                    HearsaySetting.MEDIEVAL_VILLAGE -> "A traveling cobbler's cousin told the tavern keeper that"
+                    HearsaySetting.VATICAN_PALACE -> "The Cardinal's valet overheard the Monsignor whispering that"
+                    HearsaySetting.MONASTIC_CLOISTER -> "Brother Francis told the Abbot that the herb gardener admitted that"
+                    HearsaySetting.SUBURBAN_BEAUTY_SALON -> "The parish secretary's manicurist told my aunt that"
+                    HearsaySetting.TECH_STARTUP_SLACK -> "The junior engineer told the product manager that the CTO secretly admitted that"
+                    HearsaySetting.INQUISITORIAL_TRIBUNAL -> "A court bailiff swears he heard the chief witness confess that"
+                    HearsaySetting.DOCKSIDE_ALEXANDRIA -> "A spice merchant from Alexandria told the harbor master that"
+                    HearsaySetting.DENTAL_WAITING_ROOM -> "My gym teacher's psychic told him that a local hermit revealed that"
+                }
             }
 
-        val absurdCore = recipe.customAbsurdElement?.takeIf { it.isNotBlank() }
-            ?: when (recipe.absurdistType) {
-                AbsurdistType.JUNK_FOOD -> "transubstantiation turns the sacred elements into Nacho Cheese Doritos if the priest winks at the altar"
-                AbsurdistType.ANIMALS_IN_DISGUISE -> "the Holy Trinity is actually three raccoons in a single velvet cloaked trench coat"
-                AbsurdistType.MUNICIPAL_BUREAUCRACY -> "Purgatory is an infinite DMV waiting room where your ticket is permanently B-69"
-                AbsurdistType.NOSTALGIC_BUFFETS -> "Heaven is an endless 1990s Golden Corral buffet with a lukewarm chocolate fountain"
-                AbsurdistType.CHEAP_TOYS -> "God despises golden harps and requires celestial choirs to play neon plastic kazoos"
-                AbsurdistType.OFFICE_FURNITURE -> "righteous souls are reincarnated as mid-century modern swivel chairs in dental clinics"
-                AbsurdistType.TECH_MIGRATION -> "prayers are only accepted if attached as a properly formatted PDF before 5 PM EST"
+        // Apply Tone modifier to hearsay prefix
+        val hearsayPrefix = when (customParams?.tone) {
+            JokeTone.CONSPIRATORIAL -> "Keep your voice down, but $baseHearsayPrefix"
+            JokeTone.BEWILDERED -> "I cannot fathom this, but $baseHearsayPrefix"
+            JokeTone.MELODRAMATIC -> "Hear the apocalyptic whisper! $baseHearsayPrefix"
+            JokeTone.BUREAUCRATIC_DEADPAN -> "Per ecclesiastical memorandum subsection 4-B, $baseHearsayPrefix"
+            JokeTone.REVERENTLY_IRREVERENT, null -> baseHearsayPrefix
+        }
+
+        // Generate Absurd Core based on Humor Category and Dogma
+        var absurdCore = recipe.customAbsurdElement?.takeIf { it.isNotBlank() }
+            ?: when (customParams?.humorCategory) {
+                HumorCategory.PUNS -> when (recipe.dogma) {
+                    DogmaCategory.TRANSUBSTANTIATION -> "transubstantiation turns holy bread into 'altar-native chips' because the parish council wanted to 'raise the steaks' with holy guacamole"
+                    DogmaCategory.HOLY_TRINITY -> "the Holy Trinity is three raccoons in a single robe who practice 'purr-gatory' and grant 'fur-giveness' to village taverns"
+                    DogmaCategory.ORIGINAL_SIN_EDEN -> "Original Sin occurred when Eve failed to 'ap-peal' an orchard eviction notice after baking an un-holy turnover"
+                    DogmaCategory.ANGELOLOGY -> "heavenly choirs were ordered to stop 'harping' on ancient chants and play plastic kazoos to hit the 'highest notes'"
+                    DogmaCategory.PURGATORY_ESCHATOLOGY -> "Purgatory ticket holders receive full 'absolution' only if they avoid paying a 'pew-nalty fee' at the pearly parking kiosk"
+                    DogmaCategory.DIETARY_DAMNATION -> "the Abbot expelled the kitchen friar for running an unauthorized 'deep-fryer monastery' after hours"
+                    else -> "the sacred altar was renamed the 'alter-cation desk' after the clergy started trading consecrated sourdough recipes"
+                }
+                HumorCategory.OBSERVATIONAL -> when (recipe.dogma) {
+                    DogmaCategory.TRANSUBSTANTIATION -> "transubstantiation now accounts for parishioners who awkwardly nod during the Sign of Peace while avoiding eye contact"
+                    DogmaCategory.ORIGINAL_SIN_EDEN -> "Original Sin happened because someone hit 'Reply-All' on the serpent's calendar invite for the orchard fruit tasting"
+                    DogmaCategory.HOLY_TRINITY -> "the Holy Trinity is actually three introverts sharing one umbrella at the awkward church coffee hour"
+                    DogmaCategory.PURGATORY_ESCHATOLOGY -> "Purgatory is an eternal church committee meeting where Saint Peter forgets to unmute his microphone"
+                    else -> "divine revelation is held up because the Archangel left Gabriel on 'read' in the celestial group chat for three weeks"
+                }
+                HumorCategory.SATIRICAL_BUREAUCRACY -> when (recipe.dogma) {
+                    DogmaCategory.PURGATORY_ESCHATOLOGY -> "Purgatory requires a 3-part notarized ticket submitted in person between 9:00 AM and 9:15 AM on the third Tuesday of leap years"
+                    DogmaCategory.HOLY_TRINITY -> "the Holy Trinity was audited by the celestial zoning board for failing to file a joint occupancy declaration"
+                    DogmaCategory.ANGELOLOGY -> "angels are legally classified as unpaid celestial interns subject to strict architectural noise ordinances"
+                    else -> "sacred grace is only redeemable upon submitting Form 1040-H with three signed supervisor signatures"
+                }
+                HumorCategory.DEADPAN_DRY -> when (recipe.dogma) {
+                    DogmaCategory.HOLY_TRINITY -> "the Godhead consists of three mid-level woodland badgers wearing wool vestments"
+                    DogmaCategory.TRANSUBSTANTIATION -> "the communion wafer is chemically indistinguishable from a saltine cracker baked in 1994"
+                    else -> "salvation has been officially rescheduled to next Thursday due to scheduled maintenance"
+                }
+                HumorCategory.SLAPSTICK_CHAOS -> when (recipe.dogma) {
+                    DogmaCategory.TRANSUBSTANTIATION -> "an altar boy dropped the sacred chalice into a container of baking soda, creating a frothing geyser that baptized the entire choir"
+                    DogmaCategory.HOLY_TRINITY -> "three cloaked goats broke into the vestry, tipped over the font, and bleated the Nicene Creed in three-part harmony"
+                    else -> "a runaway monastery wheelbarrow crashed into the reliquary, scattering consecrated cheese across the sanctuary"
+                }
+                HumorCategory.SURREAL, null -> when (recipe.absurdistType) {
+                    AbsurdistType.JUNK_FOOD -> "transubstantiation turns the sacred elements into Nacho Cheese Doritos if the priest winks at the altar"
+                    AbsurdistType.ANIMALS_IN_DISGUISE -> "the Holy Trinity is actually three raccoons in a single velvet cloaked trench coat"
+                    AbsurdistType.MUNICIPAL_BUREAUCRACY -> "Purgatory is an infinite DMV waiting room where your ticket is permanently B-69"
+                    AbsurdistType.NOSTALGIC_BUFFETS -> "Heaven is an endless 1990s Golden Corral buffet with a lukewarm chocolate fountain"
+                    AbsurdistType.CHEAP_TOYS -> "God despises golden harps and requires celestial choirs to play neon plastic kazoos"
+                    AbsurdistType.OFFICE_FURNITURE -> "righteous souls are reincarnated as mid-century modern swivel chairs in dental clinics"
+                    AbsurdistType.TECH_MIGRATION -> "prayers are only accepted if attached as a properly formatted PDF before 5 PM EST"
+                }
             }
+
+        // Weave in User Keywords if provided
+        val rawKeywords = customParams?.keywords?.trim()
+        if (!rawKeywords.isNullOrBlank()) {
+            absurdCore = "$absurdCore (specifically incorporating holy $rawKeywords)"
+        }
+
+        // Append custom user twist if provided
+        if (!customTwist.isNullOrBlank()) {
+            absurdCore = "$absurdCore—with an unprecedented twist: $customTwist"
+        }
 
         val statement = "\"$hearsayPrefix $absurdCore.\""
 
-        val whyHearsay = when (recipe.setting) {
-            HearsaySetting.MEDIEVAL_VILLAGE -> "A classic fourth-hand game of village telephone passing through multiple unverified tavern patrons."
-            HearsaySetting.VATICAN_PALACE -> "High-level ecclesiastical palace gossip relayed down three tiers of clerical staff."
-            HearsaySetting.MONASTIC_CLOISTER -> "Monastic rumors whispered between the scriptorium and the herb garden without canonical proof."
-            HearsaySetting.SUBURBAN_BEAUTY_SALON -> "Salon gossip relayed through an aunt from an alleged private sauna confession."
-            HearsaySetting.TECH_STARTUP_SLACK -> "Unsubstantiated workplace gossip passed down through Slack threads and hallway chatter."
-            HearsaySetting.INQUISITORIAL_TRIBUNAL -> "Multi-level courtroom hearsay—a witness testifying about what someone else claimed another person said."
-            HearsaySetting.DOCKSIDE_ALEXANDRIA -> "Dockside sailors passing third-hand theological rumors across Mediterranean trade routes."
-            HearsaySetting.DENTAL_WAITING_ROOM -> "An unsubstantiated hypnosis report passed from a hermit through a psychic to a PE teacher."
+        val whyHearsay = when (customParams?.targetAudience) {
+            TargetAudience.MEDIEVAL_PEASANTS -> "Oral peasant hearsay traded over barter goods at a muddy crossroads tavern."
+            TargetAudience.CYNICAL_SCHOLARS -> "Unsubstantiated margin notes scribbled by a sleep-deprived monk in an apocryphal manuscript."
+            TargetAudience.TIRED_OFFICE_WORKERS -> "Watercooler Slack hearsay originating from a private #random DM between frustrated tech workers."
+            TargetAudience.HOA_MEMBERS -> "Unverified neighborhood gossip circulated during an informal post-meeting HOA parking lot discussion."
+            TargetAudience.GEN_Z_CYNICS -> "Algorithmically generated internet folklore passed through three Discord servers and a TikTok thread."
+            TargetAudience.GENERAL, null -> when (recipe.setting) {
+                HearsaySetting.MEDIEVAL_VILLAGE -> "A classic fourth-hand game of village telephone passing through multiple unverified tavern patrons."
+                HearsaySetting.VATICAN_PALACE -> "High-level ecclesiastical palace gossip relayed down three tiers of clerical staff."
+                HearsaySetting.MONASTIC_CLOISTER -> "Monastic rumors whispered between the scriptorium and the herb garden without canonical proof."
+                HearsaySetting.SUBURBAN_BEAUTY_SALON -> "Salon gossip relayed through an aunt from an alleged private sauna confession."
+                HearsaySetting.TECH_STARTUP_SLACK -> "Unsubstantiated workplace gossip passed down through Slack threads and hallway chatter."
+                HearsaySetting.INQUISITORIAL_TRIBUNAL -> "Multi-level courtroom hearsay—a witness testifying about what someone else claimed another person said."
+                HearsaySetting.DOCKSIDE_ALEXANDRIA -> "Dockside sailors passing third-hand theological rumors across Mediterranean trade routes."
+                HearsaySetting.DENTAL_WAITING_ROOM -> "An unsubstantiated hypnosis report passed from a hermit through a psychic to a PE teacher."
+            }
         }
 
         val whyHeresy = recipe.customOrthodoxyTarget?.takeIf { it.isNotBlank() }?.let {
             "Violates established orthodoxy regarding $it by introducing chaotic absurdity into sacred doctrine."
         } ?: when (recipe.dogma) {
-            DogmaCategory.HOLY_TRINITY -> "Trinitarian theology explicitly forbids defining the Godhead as three disguised creatures in a single garment."
-            DogmaCategory.TRANSUBSTANTIATION -> "Reducing sacred Eucharistic transformation to modern snack food mechanics violates core sacramental dogma."
-            DogmaCategory.ORIGINAL_SIN_EDEN -> "Completely rewrites Genesis, redefines Original Sin around snack etiquette, and attributes petty cravings to the Almighty."
-            DogmaCategory.PURGATORY_ESCHATOLOGY -> "Replaces canonical eschatology and spiritual purification with soul-crushing municipal bureaucracy."
-            DogmaCategory.ANGELOLOGY -> "Subverts traditional angelology and sacred liturgy by declaring divine disdain for holy music in favor of toy woodwinds."
-            DogmaCategory.REINCARNATION -> "Blends Eastern soul-migration into Christian doctrine while flatly denying salvation in favor of commercial furniture design."
+            DogmaCategory.HOLY_TRINITY -> "Trinitarian theology explicitly forbids defining the Godhead as multi-creature disguises or wordplay."
+            DogmaCategory.TRANSUBSTANTIATION -> "Reducing sacred Eucharistic transformation to snack food or pun mechanics violates core sacramental dogma."
+            DogmaCategory.ORIGINAL_SIN_EDEN -> "Completely rewrites Genesis, redefines Original Sin around mundane etiquette, and attributes petty cravings to the Almighty."
+            DogmaCategory.PURGATORY_ESCHATOLOGY -> "Replaces canonical eschatology and spiritual purification with soul-crushing administrative red tape."
+            DogmaCategory.ANGELOLOGY -> "Subverts traditional angelology and sacred liturgy by declaring divine disdain for holy music in favor of noise toys."
+            DogmaCategory.REINCARNATION -> "Blends Eastern soul-migration into Christian doctrine while flatly denying salvation in favor of commercial furniture."
             DogmaCategory.MONASTIC_PANTHEISM -> "Asserts Pantheism, violating orthodox monotheism by denying a distinct Creator separate from creation."
-            DogmaCategory.DIETARY_DAMNATION -> "Fabricates a whole new system of divine damnation based entirely on late-night sourdough snacking habits."
+            DogmaCategory.DIETARY_DAMNATION -> "Fabricates a whole new system of divine damnation based entirely on late-night kitchen snacking habits."
             DogmaCategory.TECH_STACK_ORTHODOXY -> "Directly attacks the sacred, untouchable core doctrine of the company's tech stack and engineering culture."
         }
 
@@ -517,7 +596,7 @@ object JokeGeneratorEngine {
                     FinePrintCategory.IT_HELPDESK -> "God is omnipotent, but heavenly operations run on standard Eastern Standard Time business hours with strict file-type restrictions."
                     FinePrintCategory.PARKING_CITATION -> "Eternal redemption hangs not on your morality, but on your ability to avoid a $45 parking citation from celestial meter maids."
                     FinePrintCategory.DIETARY_EXEMPTION -> "Sacred dogma accommodates modern dietary restrictions, provided proper awkward politeness is observed by the clergy."
-                    FinePrintCategory.HOA_COVENANT -> "Paradise quiet hours are strictly enforced between 10 PM and 7 AM; celestial harp solos incur a 50-year fine."
+                    FinePrintCategory.HOA_COVENANT -> "Paradise quiet hours are strictly enforced between 10 PM and 7 AM; unapproved harp solos incur a 50-year fine."
                     FinePrintCategory.APARTMENT_LEASE -> "Celestial cloud subletting without written approval from Saint Peter voids your golden halo warranty."
                     FinePrintCategory.EXPIRATION_DATE -> "Sacramental absolution is subject to a 30-day proof-of-purchase window with no cash refunds."
                 }
@@ -534,7 +613,11 @@ object JokeGeneratorEngine {
             hearsaySetting = recipe.setting.label,
             dogmaName = recipe.dogma.label,
             absurdistElement = recipe.customAbsurdElement ?: recipe.absurdistType.label,
-            finePrintStyle = if (recipe.hasFinePrint) recipe.finePrintCategory.label else null
+            finePrintStyle = if (recipe.hasFinePrint) recipe.finePrintCategory.label else null,
+            keywords = customParams?.keywords?.takeIf { it.isNotBlank() },
+            humorCategory = customParams?.humorCategory?.label,
+            targetAudience = customParams?.targetAudience?.label,
+            tone = customParams?.tone?.label
         )
     }
 

@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -78,7 +80,11 @@ fun SavedReliquaryScreen(
                     joke.title.contains(searchQuery, ignoreCase = true) ||
                     joke.statement.contains(searchQuery, ignoreCase = true) ||
                     joke.absurdistElement.contains(searchQuery, ignoreCase = true) ||
-                    (joke.finePrint?.contains(searchQuery, ignoreCase = true) == true)
+                    (joke.finePrint?.contains(searchQuery, ignoreCase = true) == true) ||
+                    (joke.keywords?.contains(searchQuery, ignoreCase = true) == true) ||
+                    (joke.humorCategory?.contains(searchQuery, ignoreCase = true) == true) ||
+                    (joke.targetAudience?.contains(searchQuery, ignoreCase = true) == true) ||
+                    (joke.tone?.contains(searchQuery, ignoreCase = true) == true)
             matchesFav && matchesDogma && matchesQuery
         }
     }
@@ -237,6 +243,62 @@ fun SavedReliquaryScreen(
                                             imageVector = Icons.Default.Delete,
                                             contentDescription = "Delete",
                                             tint = MaterialTheme.colorScheme.outline
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (!joke.humorCategory.isNullOrBlank() || !joke.targetAudience.isNullOrBlank() || !joke.tone.isNullOrBlank() || !joke.keywords.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    joke.humorCategory?.let {
+                                        AssistChip(
+                                            onClick = {},
+                                            label = { Text(it, style = MaterialTheme.typography.labelSmall) },
+                                            colors = AssistChipDefaults.assistChipColors(
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                                labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                            ),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                        )
+                                    }
+                                    joke.targetAudience?.let {
+                                        AssistChip(
+                                            onClick = {},
+                                            label = { Text(it, style = MaterialTheme.typography.labelSmall) },
+                                            colors = AssistChipDefaults.assistChipColors(
+                                                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                                                labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                            ),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
+                                        )
+                                    }
+                                    joke.tone?.let {
+                                        AssistChip(
+                                            onClick = {},
+                                            label = { Text(it, style = MaterialTheme.typography.labelSmall) },
+                                            colors = AssistChipDefaults.assistChipColors(
+                                                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                                                labelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                            ),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f))
+                                        )
+                                    }
+                                    joke.keywords?.let {
+                                        AssistChip(
+                                            onClick = {},
+                                            label = { Text("🏷️ $it", style = MaterialTheme.typography.labelSmall) },
+                                            colors = AssistChipDefaults.assistChipColors(
+                                                containerColor = GoldPrimary.copy(alpha = 0.15f),
+                                                labelColor = MaterialTheme.colorScheme.onSurface
+                                            ),
+                                            border = BorderStroke(1.dp, GoldPrimary.copy(alpha = 0.4f))
                                         )
                                     }
                                 }

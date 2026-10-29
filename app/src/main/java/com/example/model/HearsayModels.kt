@@ -42,6 +42,39 @@ enum class FinePrintCategory(val label: String, val flavor: String) {
     EXPIRATION_DATE("Grace Expiration Notice", "Sacraments void after 30 days without original proof of purchase")
 }
 
+enum class HumorCategory(val label: String, val icon: String, val description: String) {
+    SURREAL("Surreal & Absurdist", "🦝", "Uncanny twists, bizarre juxtapositions, dreamlike non-sequiturs"),
+    PUNS("Puns & Sacred Wordplay", "✨", "Theological double meanings, liturgical spoonerisms, altar quips"),
+    OBSERVATIONAL("Observational Humor", "👀", "Relatable social habits, everyday human quirks, modern awkwardness"),
+    SATIRICAL_BUREAUCRACY("Satirical Bureaucracy", "📋", "Municipal red tape, HOA decrees, corporate IT ticketing rules"),
+    DEADPAN_DRY("Deadpan & Dry Irony", "😐", "Solemn understatement, stone-faced delivery of heretical facts"),
+    SLAPSTICK_CHAOS("Slapstick & Chaos", "💥", "Frantic mishaps, runaway animals, spilled communion chalices")
+}
+
+enum class TargetAudience(val label: String, val icon: String, val description: String) {
+    GENERAL("General Scribes", "📜", "Broadly accessible, balanced comedic heresy"),
+    MEDIEVAL_PEASANTS("Medieval Peasants", "🌾", "Agrarian folklore, tavern barters, superstitious lore"),
+    CYNICAL_SCHOLARS("Cynical Monks & Academics", "🕯️", "Obscure footnotes, Latin quips, canonical nitpicking"),
+    TIRED_OFFICE_WORKERS("Disgruntled Corporate Workers", "💼", "Slack etiquette, quarterly OKRs, corporate synergy vs eternity"),
+    HOA_MEMBERS("Strict HOA Board Members", "🏡", "Neighborhood lawn regulations, architectural review committees"),
+    GEN_Z_CYNICS("Digital Natives & Gen Z", "📱", "Existential dread, notification fatigue, chaotic internet culture")
+}
+
+enum class JokeTone(val label: String, val icon: String, val description: String) {
+    REVERENTLY_IRREVERENT("Reverently Irreverent", "🕊️", "Solemn liturgical language conveying utter nonsense"),
+    CONSPIRATORIAL("Conspiratorial Whisper", "🤫", "Hushed tavern rumors and behind-the-altar secrets"),
+    BUREAUCRATIC_DEADPAN("Bureaucratic Deadpan", "⚖️", "Dry, official regulatory handbook cadence"),
+    MELODRAMATIC("Melodramatic & Apocalyptic", "⚡", "Grandiose cosmic stakes over minuscule trivialities"),
+    BEWILDERED("Bewildered & Befuddled", "😵", "A humble witness trying desperately to make sense of what they heard")
+}
+
+data class JokeCustomizationParams(
+    val keywords: String = "",
+    val humorCategory: HumorCategory = HumorCategory.SURREAL,
+    val targetAudience: TargetAudience = TargetAudience.GENERAL,
+    val tone: JokeTone = JokeTone.REVERENTLY_IRREVERENT
+)
+
 data class JokeRecipe(
     val id: String,
     val title: String,
@@ -72,5 +105,9 @@ data class GeneratedJoke(
     val finePrintStyle: String?,
     val customPunchline: String? = null,
     val isFavorite: Boolean = false,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val keywords: String? = null,
+    val humorCategory: String? = null,
+    val targetAudience: String? = null,
+    val tone: String? = null
 )

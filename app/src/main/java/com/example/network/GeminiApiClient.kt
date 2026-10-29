@@ -82,9 +82,15 @@ object GeminiNetworkClient {
     suspend fun generateHeresyWithAI(
         setting: String,
         dogma: String,
+        orthodoxDogma: String? = null,
+        violationDesc: String? = null,
         absurdTheme: String,
         finePrintStyle: String?,
-        userModificationPrompt: String?
+        keywords: String? = null,
+        humorCategory: String? = null,
+        targetAudience: String? = null,
+        tone: String? = null,
+        userModificationPrompt: String? = null
     ): String? = withContext(Dispatchers.IO) {
         val apiKey = BuildConfig.GEMINI_API_KEY
         if (apiKey.isNullOrBlank() || apiKey == "MY_GEMINI_API_KEY") {
@@ -93,13 +99,25 @@ object GeminiNetworkClient {
 
         val systemPrompt = """
             You are the Master Scribe of Hearsay and Heresy Jokes.
-            You craft hilarious jokes strictly following this exact 4-part structural formula:
+            You craft hilarious jokes strictly adhering to the 4-part foundational formula from the sacred canonical recipes:
             1. The Hearsay Chain: Construct a multi-layered, unreliable chain of telephone transmission (e.g. "My cousin's blacksmith's apprentice claims he overheard the Cardinal's butler whispering that...").
             2. The Heresy Formula: Identify actual established theological/institutional doctrines and violate their sacred boundary with absurdity.
             3. The Absurdist Engine: Inject mundane, hyper-specific modern items or surreal imagery (e.g., Cool Ranch Doritos, plastic kazoos, 1990s Golden Corral buffet in Ohio, DMV waiting rooms).
             4. The Petty Liturgical Fine Print (HOA Clause): An insanely specific bureaucratic exception or condition treating cosmic reality like a bad apartment lease or IT ticket.
             
-            Return output formatted EXACTLY with these 4 sections:
+            ADHERENCE TO ADVANCED CUSTOMIZATION PARAMETERS:
+            - SPECIFIC KEYWORDS: You MUST naturally weave any requested keywords into the gossip chain, heretical claim, or fine print.
+            - HUMOR CATEGORY: You MUST adjust the comedy mechanics to match the chosen humor category:
+              * Puns & Wordplay: Incorporate clever liturgical/theological puns (e.g., pastor/pasta, altar/alter, friar/fryer, sole/soul, pews, holy water).
+              * Observational Humor: Focus on relatable human foibles, social awkwardness, church coffee hour, group texts, or everyday quirks.
+              * Surreal & Absurdist: Emphasize dreamlike juxtapositions, bizarre creature antics, and strange reality glitches.
+              * Satirical Bureaucracy: Lean heavily into administrative red tape, corporate IT rules, and HOA covenants.
+              * Deadpan & Dry Irony: Deliver shocking theological heresy in completely understated, matter-of-fact bureaucratic tone.
+              * Slapstick & Chaos: Frame with frantic physical mishaps, runaway animals, or accidental confessions.
+            - TARGET AUDIENCE: Tailor cultural idioms, vocabulary, and comedic perspective directly to the target audience (e.g., peasants, cynical monks/scholars, disgruntled corporate workers, HOA members, Gen Z).
+            - TONE: Deliver in the explicit tone requested (Reverently Irreverent, Conspiratorial Whisper, Bureaucratic Deadpan, Melodramatic & Apocalyptic, or Bewildered).
+            
+            Return output formatted EXACTLY with these 5 sections:
             TITLE: <Short Catchy Joke Title>
             STATEMENT: "<Full quote with the hearsay chain and heretical statement>"
             WHY HEARSAY: <Explanation of the unreliable transmission chain>
@@ -108,15 +126,36 @@ object GeminiNetworkClient {
         """.trimIndent()
 
         val userPrompt = buildString {
-            append("Generate a hilarious Hearsay & Heresy joke with:")
+            append("Generate a customized Hearsay & Heresy joke adhering to these exact parameters:")
+            append("\n\n[BASE RECIPE PARAMETERS]")
             append("\n- Setting: $setting")
             append("\n- Dogma to subvert: $dogma")
-            append("\n- Absurdist element: $absurdTheme")
+            if (!orthodoxDogma.isNullOrBlank()) {
+                append(" (Orthodox Doctrine: \"$orthodoxDogma\")")
+            }
+            if (!violationDesc.isNullOrBlank()) {
+                append(" (Target Violation: \"$violationDesc\")")
+            }
+            append("\n- Absurdist element theme: $absurdTheme")
             if (!finePrintStyle.isNullOrBlank()) {
                 append("\n- Fine Print Style: $finePrintStyle")
             }
+
+            append("\n\n[ADVANCED CUSTOMIZATION PARAMETERS]")
+            if (!keywords.isNullOrBlank()) {
+                append("\n- Required Keywords to Integrate: \"$keywords\" (Seamlessly weave these into the joke statement, premise, or fine print)")
+            }
+            if (!humorCategory.isNullOrBlank()) {
+                append("\n- Desired Humor Category: $humorCategory")
+            }
+            if (!targetAudience.isNullOrBlank()) {
+                append("\n- Target Audience: $targetAudience")
+            }
+            if (!tone.isNullOrBlank()) {
+                append("\n- Tone of Delivery: $tone")
+            }
             if (!userModificationPrompt.isNullOrBlank()) {
-                append("\n- Custom User Twist: $userModificationPrompt")
+                append("\n- Additional Custom Twist: $userModificationPrompt")
             }
         }
 

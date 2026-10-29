@@ -12,7 +12,11 @@ import com.example.model.DogmaCategory
 import com.example.model.FinePrintCategory
 import com.example.model.GeneratedJoke
 import com.example.model.HearsaySetting
+import com.example.model.HumorCategory
+import com.example.model.JokeCustomizationParams
 import com.example.model.JokeRecipe
+import com.example.model.JokeTone
+import com.example.model.TargetAudience
 import com.example.util.OratorPersona
 import com.example.util.ShareHelper
 import com.example.util.VocalOratorEngine
@@ -52,7 +56,14 @@ data class JokeUiState(
     val searchQuery: String = "",
     val dogmaFilter: DogmaCategory? = null,
     val customTwistInput: String = "",
-    val statusMessage: String? = null
+    val statusMessage: String? = null,
+    val customizationParams: JokeCustomizationParams = JokeCustomizationParams(),
+    val isCustomizationPanelExpanded: Boolean = true,
+    val keywordSuggestions: List<String> = listOf(
+        "air fryer", "Costco samples", "Bluetooth speaker", "Roomba",
+        "sourdough starter", "microwave fish", "smart fridge", "HR committee",
+        "fleece vest", "Baja Blast", "unsubscribing from emails", "LinkedIn posts"
+    )
 )
 
 class JokeViewModel(application: Application) : AndroidViewModel(application) {
@@ -248,7 +259,11 @@ class JokeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.update { it.copy(isGenerating = true) }
             val customTwist = _uiState.value.customTwistInput.takeIf { it.isNotBlank() }
-            val joke = repository.generateJoke(_uiState.value.activeRecipe, customTwist)
+            val joke = repository.generateJoke(
+                recipe = _uiState.value.activeRecipe,
+                customInstruction = customTwist,
+                customizationParams = _uiState.value.customizationParams
+            )
             _uiState.update {
                 it.copy(
                     activeJoke = joke,
@@ -260,6 +275,70 @@ class JokeViewModel(application: Application) : AndroidViewModel(application) {
             if (_uiState.value.vocalState.autoPlayOnGenerate) {
                 vocalOratorEngine.deliverJoke(joke)
             }
+        }
+    }
+
+    fun setKeywords(keywords: String) {
+        _uiState.update {
+            it.copy(customizationParams = it.customizationParams.copy(keywords = keywords))
+        }
+    }
+
+    fun appendKeywordSuggestion(keyword: String) {
+        _uiState.update {
+            val current = it.customizationParams.keywords.trim()
+            val updatedKeywords = if (current.isEmpty()) keyword else "$current, $keyword"
+            it.copy(customizationParams = it.customizationParams.copy(keywords = updatedKeywords))
+        }
+    }
+
+    fun setHumorCategory(category: HumorCategory) {
+        _uiState.update {
+            it.copy(customizationParams = it.customizationParams.copy(humorCategory = category))
+        }
+    }
+
+    fun setTargetAudience(audience: TargetAudience) {
+        _uiState.update {
+            it.copy(customizationParams = it.customizationParams.copy(targetAudience = audience))
+        }
+    }
+
+    fun setJokeTone(tone: JokeTone) {
+        _uiState.update {
+            it.copy(customizationParams = it.customizationParams.copy(tone = tone))
+        }
+    }
+
+    fun toggleCustomizationPanel() {
+        _uiState.update { it.copy(isCustomizationPanelExpanded = !it.isCustomizationPanelExpanded) }
+    }
+
+    fun randomizeCustomizationParams() {
+        val randomCategory = HumorCategory.entries.random()
+        val randomAudience = TargetAudience.entries.random()
+        val randomTone = JokeTone.entries.random()
+        val randomKeyword = _uiState.value.keywordSuggestions.random()
+
+        _uiState.update {
+            it.copy(
+                customizationParams = JokeCustomizationParams(
+                    keywords = randomKeyword,
+                    humorCategory = randomCategory,
+                    targetAudience = randomAudience,
+                    tone = randomTone
+                ),
+                statusMessage = "🎲 Rolled Customization: ${randomCategory.label} for ${randomAudience.label}!"
+            )
+        }
+    }
+
+    fun resetCustomizationParams() {
+        _uiState.update {
+            it.copy(
+                customizationParams = JokeCustomizationParams(),
+                statusMessage = "Reset scriptorium customization parameters."
+            )
         }
     }
 

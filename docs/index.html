@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hearsay & Heresy • Medieval Theological Joke Generator</title>
+  <meta name="description" content="Generate, customize, and remix hilarious theological hearsay jokes with illuminated medieval parchment styling, Web Speech vocal orator, and instant card exports on GitHub Pages.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&family=MedievalSharp&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="header-container">
+      <a href="#" class="branding" onclick="switchTab('generator'); return false;">
+        <span class="brand-icon">📜</span>
+        <div>
+          <h1 class="brand-title">HEARSAY & HERESY</h1>
+          <div class="brand-sub">Illuminated Theological Satire</div>
+        </div>
+      </a>
+
+      <nav class="nav-tabs">
+        <button class="nav-btn active" data-tab="generator" onclick="switchTab('generator')">
+          ⚡ Generator
+        </button>
+        <button class="nav-btn" data-tab="recipes" onclick="switchTab('recipes')">
+          🧪 Recipe Lab
+        </button>
+        <button class="nav-btn" data-tab="reliquary" onclick="switchTab('reliquary')">
+          🏛️ Reliquary <span class="badge-count" id="reliquaryCount">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Areas -->
+  <main>
+
+    <!-- SECTION 1: JOKE GENERATOR -->
+    <section id="section-generator" class="app-section active">
+      
+      <!-- Illuminated Decree Display -->
+      <div class="decree-hero">
+        <article class="parchment-card" id="decreeCard">
+          <header class="decree-header">
+            <div class="decree-meta">
+              <span class="decree-label">Ecclesiastical Decree</span>
+              <h2 class="decree-title" id="decreeTitle">The Holy Raccoon Trinity</h2>
+            </div>
+            <div class="decree-seal" title="Papal Inquisitorial Seal">✠</div>
+          </header>
+
+          <p class="decree-statement" id="decreeStatement">
+            "My cousin's blacksmith's apprentice claims he overheard the Cardinal's butler whispering that the Holy Trinity is actually just three very clever raccoons sharing a single velvet cloak."
+          </p>
+
+          <div class="decree-analysis">
+            <div class="analysis-box">
+              <div class="analysis-title hearsay">📜 Why It's Hearsay</div>
+              <p class="analysis-text" id="whyHearsayText">
+                A multi-tier chain of village telephone jumping through an apprentice, a blacksmith, a cousin, and a butler.
+              </p>
+            </div>
+            <div class="analysis-box">
+              <div class="analysis-title heresy">🔥 Why It's Heresy</div>
+              <p class="analysis-text" id="whyHeresyText">
+                Trinitarian theology explicitly forbids defining the Godhead as a trio of trash pandas in a cloak.
+              </p>
+            </div>
+          </div>
+
+          <div class="fine-print-banner" id="decreeFinePrint">
+            ⚖️ Ecclesiastical Clause: Discovered during a velvet laundering dispute behind Saint Peter's chapel.
+          </div>
+
+          <div class="decree-chips" id="decreeChips">
+            <!-- Rendered by JS -->
+          </div>
+        </article>
+
+        <!-- Decree Action Toolbar -->
+        <div class="decree-toolbar">
+          <button class="action-btn primary" onclick="generateJoke()">
+            ✨ Summon Hearsay
+          </button>
+          <button class="action-btn" id="speakBtn" onclick="toggleVocalOrator()">
+            🎙️ Vocal Orator
+          </button>
+          <button class="action-btn" onclick="exportIlluminatedCard()">
+            🖼️ Export Card (PNG)
+          </button>
+          <button class="action-btn" onclick="shareDecree()">
+            📤 Share Decree
+          </button>
+          <button class="action-btn" id="saveBtn" onclick="toggleSaveCurrentJoke()">
+            🔖 Save to Reliquary
+          </button>
+        </div>
+      </div>
+
+      <!-- Advanced Customization Accordion -->
+      <div class="control-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>⚙️</span> Advanced Customization Panel
+          </div>
+          <div class="panel-actions">
+            <button class="icon-btn" onclick="randomizeCustomization()" title="Surprise Mix (Randomize)">🎲</button>
+            <button class="icon-btn" onclick="resetCustomization()" title="Reset to Defaults">↺</button>
+            <button class="icon-btn" onclick="toggleCustomizationPanel()" title="Toggle Panel" id="panelToggleIcon">▼</button>
+          </div>
+        </div>
+
+        <div id="panelBody" style="display: none;">
+          <!-- 1. Specific Keywords -->
+          <div class="form-section">
+            <label class="section-label" for="keywordInput">🔑 Specific Keywords to Weave In</label>
+            <div class="input-container">
+              <input type="text" id="keywordInput" class="text-input" placeholder="e.g. air fryer, Costco, bluetooth, roomba, microwave fish">
+            </div>
+            <div class="sparks-row">
+              <span class="sparks-label">Sparks:</span>
+              <button class="spark-chip" onclick="appendSpark('air fryer')">+ air fryer</button>
+              <button class="spark-chip" onclick="appendSpark('Costco')">+ Costco</button>
+              <button class="spark-chip" onclick="appendSpark('Bluetooth')">+ Bluetooth</button>
+              <button class="spark-chip" onclick="appendSpark('roomba')">+ roomba</button>
+              <button class="spark-chip" onclick="appendSpark('microwave fish')">+ microwave fish</button>
+            </div>
+          </div>
+
+          <!-- 2. Humor Category -->
+          <div class="form-section">
+            <label class="section-label">🎭 Desired Humor Category</label>
+            <div class="chips-scroll" id="categoryChips"></div>
+            <div class="chip-desc" id="categoryDesc">Style: Clerical wordplay and scholastic linguistic gymnastics.</div>
+          </div>
+
+          <!-- 3. Target Audience -->
+          <div class="form-section">
+            <label class="section-label">👥 Target Audience</label>
+            <div class="chips-scroll" id="audienceChips"></div>
+            <div class="chip-desc" id="audienceDesc">Perspective: Exhausted desk workers who understand purgatory via corporate meetings.</div>
+          </div>
+
+          <!-- 4. Delivery Tone -->
+          <div class="form-section">
+            <label class="section-label">🎙️ Tone of Delivery</label>
+            <div class="chips-scroll" id="toneChips"></div>
+            <div class="chip-desc" id="toneDesc">Vibe: Dry, flat, clerical monotony reciting an administrative circular.</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECTION 2: RECIPE LAB -->
+    <section id="section-recipes" class="app-section">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-family: var(--font-display); color: var(--gold); margin-bottom: 6px;">Theological Recipe Codex</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Select any canonical dogma recipe to load its curated hearsay formula into the generator.</p>
+      </div>
+
+      <div class="recipes-grid" id="recipesGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 3: RELIQUARY -->
+    <section id="section-reliquary" class="app-section">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-family: var(--font-display); color: var(--gold); margin-bottom: 6px;">Enshrined Reliquary</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">All your bookmarked decrees, saved offline directly in your browser's local storage.</p>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="reliquarySearch" class="text-input" placeholder="🔍 Search saved decrees by keyword, title, or dogma...">
+      </div>
+
+      <div class="reliquary-grid" id="reliquaryGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Offscreen Canvas for High-Resolution PNG Exports -->
+  <canvas id="exportCanvas"></canvas>
+
+  <!-- Notification Toast -->
+  <div class="toast" id="toast">Decree updated!</div>
+
+  <!-- Footer -->
+  <footer>
+    <p>Hearsay & Heresy • Medieval Theological Joke Generator & Web Companion</p>
+    <p style="margin-top: 4px; font-size: 0.8rem; color: #7a6e64;">
+      Runs directly on GitHub Pages with client-side Web Speech and Canvas card export. Also available as an Android application.
+    </p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -231,7 +231,18 @@ fun HearsayApp(viewModel: JokeViewModel) {
                             viewModel.setShowVocalDialog(true)
                         },
                         isSpeaking = uiState.vocalState.isSpeaking,
-                        onNavigateToLab = { viewModel.setTab(AppTab.RECIPE_LAB) }
+                        onNavigateToLab = { viewModel.setTab(AppTab.RECIPE_LAB) },
+                        customizationParams = uiState.customizationParams,
+                        isCustomizationExpanded = uiState.isCustomizationPanelExpanded,
+                        keywordSuggestions = uiState.keywordSuggestions,
+                        onKeywordsChange = viewModel::setKeywords,
+                        onKeywordSuggestionClick = viewModel::appendKeywordSuggestion,
+                        onHumorCategorySelect = viewModel::setHumorCategory,
+                        onTargetAudienceSelect = viewModel::setTargetAudience,
+                        onToneSelect = viewModel::setJokeTone,
+                        onToggleCustomizationPanel = viewModel::toggleCustomizationPanel,
+                        onRandomizeCustomization = viewModel::randomizeCustomizationParams,
+                        onResetCustomization = viewModel::resetCustomizationParams
                     )
                 }
 

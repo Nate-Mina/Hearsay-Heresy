@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.generator.JokeGeneratorEngine
 import com.example.generator.JokeSlot
 import com.example.model.GeneratedJoke
+import com.example.model.JokeCustomizationParams
 import com.example.model.JokeRecipe
 import com.example.network.GeminiNetworkClient
 import kotlinx.coroutines.flow.Flow
@@ -57,26 +58,36 @@ class JokeRepository(context: Context) {
         jokeDao.deleteCustomRecipeById(id)
     }
 
-    suspend fun generateJoke(recipe: JokeRecipe, customInstruction: String? = null): GeneratedJoke {
+    suspend fun generateJoke(
+        recipe: JokeRecipe,
+        customInstruction: String? = null,
+        customizationParams: JokeCustomizationParams? = null
+    ): GeneratedJoke {
         // Check if Gemini AI is available and user requested custom twist or AI generation
         if (GeminiNetworkClient.hasValidApiKey()) {
             val aiResponse = GeminiNetworkClient.generateHeresyWithAI(
                 setting = recipe.setting.label,
                 dogma = recipe.dogma.label,
+                orthodoxDogma = recipe.dogma.orthodoxDogma,
+                violationDesc = recipe.dogma.violationDesc,
                 absurdTheme = recipe.customAbsurdElement ?: recipe.absurdistType.label,
                 finePrintStyle = if (recipe.hasFinePrint) recipe.finePrintCategory.label else null,
+                keywords = customizationParams?.keywords?.takeIf { it.isNotBlank() },
+                humorCategory = customizationParams?.humorCategory?.label,
+                targetAudience = customizationParams?.targetAudience?.label,
+                tone = customizationParams?.tone?.label,
                 userModificationPrompt = customInstruction
             )
 
             if (!aiResponse.isNullOrBlank()) {
-                val parsedJoke = parseAiJokeResponse(aiResponse, recipe)
+                val parsedJoke = parseAiJokeResponse(aiResponse, recipe, customizationParams)
                 val savedId = saveJoke(parsedJoke)
                 return parsedJoke.copy(id = savedId)
             }
         }
 
-        // Fallback or offline combinatorial recipe engine (authentic formulas from PDF)
-        val generated = JokeGeneratorEngine.generateJoke(recipe)
+        // Fallback or offline combinatorial recipe engine (authentic formulas from PDF + advanced customizations)
+        val generated = JokeGeneratorEngine.generateJoke(recipe, customizationParams, customInstruction)
         val savedId = saveJoke(generated)
         return generated.copy(id = savedId)
     }
@@ -87,7 +98,11 @@ class JokeRepository(context: Context) {
         return mutated
     }
 
-    private fun parseAiJokeResponse(text: String, recipe: JokeRecipe): GeneratedJoke {
+    private fun parseAiJokeResponse(
+        text: String,
+        recipe: JokeRecipe,
+        customParams: JokeCustomizationParams? = null
+    ): GeneratedJoke {
         var title = recipe.title
         var statement = ""
         var whyHearsay = ""
@@ -137,7 +152,11 @@ class JokeRepository(context: Context) {
             hearsaySetting = recipe.setting.label,
             dogmaName = recipe.dogma.label,
             absurdistElement = recipe.customAbsurdElement ?: recipe.absurdistType.label,
-            finePrintStyle = if (recipe.hasFinePrint) recipe.finePrintCategory.label else null
+            finePrintStyle = if (recipe.hasFinePrint) recipe.finePrintCategory.label else null,
+            keywords = customParams?.keywords?.takeIf { it.isNotBlank() },
+            humorCategory = customParams?.humorCategory?.label,
+            targetAudience = customParams?.targetAudience?.label,
+            tone = customParams?.tone?.label
         )
     }
 }
